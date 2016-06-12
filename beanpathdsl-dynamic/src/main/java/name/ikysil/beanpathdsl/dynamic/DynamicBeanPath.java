@@ -20,13 +20,12 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
@@ -44,6 +43,20 @@ public final class DynamicBeanPath {
         @Override
         protected List<PropertyDescriptor> initialValue() {
             return new ArrayList<>();
+        }
+
+    };
+
+    private static final ThreadLocal<Set<BeanFactory>> FACTORIES = new ThreadLocal<Set<BeanFactory>>() {
+
+        @Override
+        protected Set<BeanFactory> initialValue() {
+            ServiceLoader<BeanFactory> serviceLoader = ServiceLoader.load(BeanFactory.class);
+            Set<BeanFactory> result = new HashSet<>();
+            for (BeanFactory beanFactory : serviceLoader) {
+                result.add(beanFactory);
+            }
+            return result;
         }
 
     };
@@ -138,31 +151,6 @@ public final class DynamicBeanPath {
 
         private final Map<String, PropertyDescriptor> methodNameToPropertyDescriptor = new HashMap<>();
 
-        private static final Map<Class<?>, Object> PRIMITIVE_TYPE_INSTANCE = new HashMap<>();
-
-        static {
-            PRIMITIVE_TYPE_INSTANCE.put(Void.TYPE, Void.TYPE);
-            PRIMITIVE_TYPE_INSTANCE.put(Void.class, Void.TYPE);
-            PRIMITIVE_TYPE_INSTANCE.put(Character.TYPE, Character.valueOf(' '));
-            PRIMITIVE_TYPE_INSTANCE.put(Character.class, Character.valueOf(' '));
-            PRIMITIVE_TYPE_INSTANCE.put(Boolean.TYPE, Boolean.FALSE);
-            PRIMITIVE_TYPE_INSTANCE.put(Boolean.class, Boolean.FALSE);
-            PRIMITIVE_TYPE_INSTANCE.put(Byte.TYPE, Byte.valueOf((byte) 0));
-            PRIMITIVE_TYPE_INSTANCE.put(Byte.class, Byte.valueOf((byte) 0));
-            PRIMITIVE_TYPE_INSTANCE.put(Short.TYPE, Short.valueOf((short) 0));
-            PRIMITIVE_TYPE_INSTANCE.put(Short.class, Short.valueOf((short) 0));
-            PRIMITIVE_TYPE_INSTANCE.put(Integer.TYPE, Integer.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(Integer.class, Integer.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(Long.TYPE, Long.valueOf(0L));
-            PRIMITIVE_TYPE_INSTANCE.put(Long.class, Long.valueOf(0L));
-            PRIMITIVE_TYPE_INSTANCE.put(Float.TYPE, Float.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(Float.class, Float.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(Double.TYPE, Double.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(Double.class, Double.valueOf(0));
-            PRIMITIVE_TYPE_INSTANCE.put(BigInteger.class, BigInteger.valueOf(0L));
-            PRIMITIVE_TYPE_INSTANCE.put(BigDecimal.class, BigDecimal.valueOf(0L));
-        }
-
         public DefaultMethodHandler(Class<?> sourceClass) {
             populatePropertyDescriptors(sourceClass);
         }
@@ -189,9 +177,11 @@ public final class DynamicBeanPath {
                 return proceed.invoke(self, args);
             }
             final Class<?> returnType = thisMethod.getReturnType();
-            Object primitive = PRIMITIVE_TYPE_INSTANCE.get(returnType);
-            if (primitive != null) {
-                return primitive;
+            for (BeanFactory factory : FACTORIES.get()) {
+                Object primitive = factory.createInstance(returnType);
+                if (primitive != null) {
+                    return primitive;
+                }
             }
             if (returnType.isArray()) {
                 return Array.newInstance(returnType.getComponentType(), 0);
