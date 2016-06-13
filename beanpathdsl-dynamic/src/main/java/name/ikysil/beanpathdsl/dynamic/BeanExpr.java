@@ -23,6 +23,11 @@ import java.beans.PropertyDescriptor;
  */
 class BeanExpr {
 
+    public BeanExpr(BeanExpr parent, PropertyDescriptor property) {
+        this.parent = parent;
+        this.property = property;
+    }
+
     private BeanExpr parent;
 
     /**
@@ -61,6 +66,12 @@ class BeanExpr {
      */
     public void setProperty(PropertyDescriptor property) {
         this.property = property;
+    }
+
+    @Override
+    public String toString() {
+        String parentPath = parent == null ? null : parent.toString();
+        return (parentPath == null ? "" : parentPath + ".") + property.getName();
     }
 
 }

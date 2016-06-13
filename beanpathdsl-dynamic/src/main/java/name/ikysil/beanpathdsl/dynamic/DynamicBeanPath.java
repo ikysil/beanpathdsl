@@ -20,10 +20,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -38,14 +36,7 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
  */
 public final class DynamicBeanPath {
 
-    private static final ThreadLocal<List<PropertyDescriptor>> CURRENT_PATH = new ThreadLocal<List<PropertyDescriptor>>() {
-
-        @Override
-        protected List<PropertyDescriptor> initialValue() {
-            return new ArrayList<>();
-        }
-
-    };
+    private static final ThreadLocal<BeanExpr> CURRENT_PATH = new ThreadLocal<>();
 
     private static final ThreadLocal<Set<BeanFactory>> FACTORIES = new ThreadLocal<Set<BeanFactory>>() {
 
@@ -65,10 +56,11 @@ public final class DynamicBeanPath {
     }
 
     /**
+     * Reset current bean path and start from a bean of specified class.
      *
-     * @param <T>
-     * @param clazz
-     * @return
+     * @param <T> type of the bean
+     * @param clazz class of the bean
+     * @return instance of the bean class instrumented to capture getters and setters invocations
      */
     public static <T> T root(Class<T> clazz) {
         CURRENT_PATH.remove();
@@ -76,10 +68,11 @@ public final class DynamicBeanPath {
     }
 
     /**
+     * Continue bean path construction from a bean of specified class.
      *
-     * @param <T>
-     * @param clazz
-     * @return
+     * @param <T> type of the bean
+     * @param clazz class of the bean
+     * @return instance of the bean class instrumented to capture getters and setters invocations
      */
     @SuppressWarnings("unchecked")
     public static <T> T expr(Class<T> clazz) {
@@ -108,28 +101,23 @@ public final class DynamicBeanPath {
     }
 
     /**
+     * Return the current bean path. Parameter is ignored.
      *
-     * @param o
-     * @return
+     * @param o ignored
+     * @return current bean path
      */
     public static String path(Object o) {
         return path();
     }
 
     /**
+     * Return the current bean path.
      *
-     * @return
+     * @return current bean path
      */
     public static String path() {
-        StringBuilder sb = new StringBuilder();
-        List<PropertyDescriptor> pdPath = CURRENT_PATH.get();
-        for (PropertyDescriptor pd : pdPath) {
-            if (sb.length() != 0) {
-                sb.append('.');
-            }
-            sb.append(pd.getName());
-        }
-        return sb.toString();
+        BeanExpr beanExpr = CURRENT_PATH.get();
+        return beanExpr == null ? null : beanExpr.toString();
     }
 
     private static class DefaultMethodFilter implements MethodFilter {
@@ -194,7 +182,7 @@ public final class DynamicBeanPath {
             PropertyDescriptor pd = methodNameToPropertyDescriptor.get(methodName);
             final boolean result = pd != null;
             if (result) {
-                CURRENT_PATH.get().add(pd);
+                CURRENT_PATH.set(new BeanExpr(CURRENT_PATH.get(), pd));
             }
             return result;
         }

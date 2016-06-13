@@ -46,8 +46,8 @@ public class Main {
         System.out.println(path());
         System.out.println(path(expr(JButton.class).getAction().isEnabled()));
         System.out.println(path(root(JLabel.class).getAccessibleContext().getAccessibleAction()));
-        System.out.println(root(TestBeanA.class).toString());
-        System.out.println(root(JLabel.class).toString());
+        System.out.println(path(root(TestBeanA.class).toString()));
+        System.out.println(path(root(JLabel.class).toString()));
         System.out.println(path(root(TestBeanA.class).getChild().getCalendar().getTimeInMillis()));
         System.out.println(path(root(TestBeanA.class).getCalendar().getEon().getLowestSetBit()));
         System.out.println(path(root(TestBeanA.class).getClass().getAnnotations()));
