@@ -49,4 +49,13 @@ public interface IncludeSample {
     @ScanPackage
     void includeBeanUtils(DynaClass dynaClass);
 
+    @IncludeClass
+    public class MemberL2 {
+
+        public class MemberL3 {
+
+        }
+
+    }
+
 }

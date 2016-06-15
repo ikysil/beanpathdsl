@@ -16,7 +16,6 @@
 package name.ikysil.beanpathdsl.codegen;
 
 import java.nio.charset.Charset;
-import java.util.List;
 
 /**
  *
@@ -27,86 +26,6 @@ public class Configuration {
     public static final String DEFAULT_CLASS_NAME_PREFIX = "BP";
 
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF8");
-
-    private List<String> includedPackages;
-
-    /**
-     * Get the value of includedPackages
-     *
-     * @return the value of includedPackages
-     */
-    public List<String> getIncludedPackages() {
-        return includedPackages;
-    }
-
-    /**
-     * Set the value of includedPackages
-     *
-     * @param includedPackages new value of includedPackages
-     */
-    public void setIncludedPackages(List<String> includedPackages) {
-        this.includedPackages = includedPackages;
-    }
-
-    private List<String> excludedPackages;
-
-    /**
-     * Get the value of excludedPackages
-     *
-     * @return the value of excludedPackages
-     */
-    public List<String> getExcludedPackages() {
-        return excludedPackages;
-    }
-
-    /**
-     * Set the value of excludedPackages
-     *
-     * @param excludedPackages new value of excludedPackages
-     */
-    public void setExcludedPackages(List<String> excludedPackages) {
-        this.excludedPackages = excludedPackages;
-    }
-
-    private List<String> includedClasses;
-
-    /**
-     * Get the value of includedClasses
-     *
-     * @return the value of includedClasses
-     */
-    public List<String> getIncludedClasses() {
-        return includedClasses;
-    }
-
-    /**
-     * Set the value of includedClasses
-     *
-     * @param includedClasses new value of includedClasses
-     */
-    public void setIncludedClasses(List<String> includedClasses) {
-        this.includedClasses = includedClasses;
-    }
-
-    private List<String> excludedClasses;
-
-    /**
-     * Get the value of excludedClasses
-     *
-     * @return the value of excludedClasses
-     */
-    public List<String> getExcludedClasses() {
-        return excludedClasses;
-    }
-
-    /**
-     * Set the value of excludedClasses
-     *
-     * @param excludedClasses new value of excludedClasses
-     */
-    public void setExcludedClasses(List<String> excludedClasses) {
-        this.excludedClasses = excludedClasses;
-    }
 
     private String outputDirectory;
 
