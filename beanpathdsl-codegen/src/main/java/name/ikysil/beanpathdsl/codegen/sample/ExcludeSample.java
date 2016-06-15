@@ -27,7 +27,7 @@ public interface ExcludeSample {
 
     @ExcludeClass
     @ExcludePackage(prefix = true)
-    void excludeClasses(Class<?> clazz, Collection<?> collection, java.awt.Component component, javax.swing.JComponent jComponent,
+    void excludeClasses(Class<?> clazz, Collection<?> collection,
             javax.accessibility.Accessible accessible);
 
 }

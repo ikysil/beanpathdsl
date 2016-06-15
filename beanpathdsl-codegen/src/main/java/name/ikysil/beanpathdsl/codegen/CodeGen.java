@@ -15,6 +15,9 @@
  */
 package name.ikysil.beanpathdsl.codegen;
 
+import java.util.Map;
+import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
+
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
@@ -30,8 +33,10 @@ public class CodeGen {
     public void scanInput() {
         Context context = new Context();
         context.scanAnnotatedElements();
-        for (Class<?> clazz : context.buildTransitiveClosure()) {
-            System.out.println("Class: " + clazz.getName());
+        for (Map.Entry<Class<?>, IncludedClass> entry : context.buildTransitiveClosure().entrySet()) {
+            Class<?> clazz = entry.getKey();
+            IncludedClass config = entry.getValue();
+            System.out.println(String.format("Class %s : %s", clazz, config));
         }
     }
 

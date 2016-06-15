@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,11 +30,11 @@ import java.util.Set;
 import name.ikysil.beanpathdsl.annotation.ExcludeClass;
 import name.ikysil.beanpathdsl.annotation.ExcludePackage;
 import name.ikysil.beanpathdsl.annotation.IncludeClass;
-import name.ikysil.beanpathdsl.annotation.IncludePackage;
+import name.ikysil.beanpathdsl.annotation.ScanPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedClass;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
-import name.ikysil.beanpathdsl.codegen.configuration.IncludedPackage;
+import name.ikysil.beanpathdsl.codegen.configuration.ScannedPackage;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -41,6 +42,7 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.MethodParameterScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +57,7 @@ public class Context {
     private final Reflections reflections = new Reflections(
             new FieldAnnotationsScanner(),
             new TypeAnnotationsScanner(),
-            new SubTypesScanner(false),
+            new SubTypesScanner(),
             new MethodAnnotationsScanner(),
             new MethodParameterScanner()
     );
@@ -80,7 +82,7 @@ public class Context {
 
     private final Map<Class<?>, IncludedClass> includedClasses = new HashMap<>();
 
-    private final Collection<IncludedPackage> includedPackages = new ArrayList<>();
+    private final Collection<ScannedPackage> scannedPackages = new ArrayList<>();
 
     public void scanAnnotatedElements() {
         Map<Class<?>, ExcludeClass> excludeClassesConfiguration = scanForAnnotation(ExcludeClass.class);
@@ -103,12 +105,12 @@ public class Context {
             IncludeClass config = entry.getValue();
             includedClasses.put(clazz, new IncludedClass(clazz, config));
         }
-        Map<Class<?>, IncludePackage> includePackagesConfiguration = scanForAnnotation(IncludePackage.class);
-        for (Map.Entry<Class<?>, IncludePackage> entry : includePackagesConfiguration.entrySet()) {
+        Map<Class<?>, ScanPackage> includePackagesConfiguration = scanForAnnotation(ScanPackage.class);
+        for (Map.Entry<Class<?>, ScanPackage> entry : includePackagesConfiguration.entrySet()) {
             Class<?> clazz = entry.getKey();
-            IncludePackage config = entry.getValue();
+            ScanPackage config = entry.getValue();
             if (clazz.getPackage() != null) {
-                includedPackages.add(new IncludedPackage(clazz.getPackage(), config));
+                scannedPackages.add(new ScannedPackage(clazz.getPackage(), config));
             }
         }
         Map<Class<?>, name.ikysil.beanpathdsl.annotation.Configuration> configurations = scanForAnnotation(name.ikysil.beanpathdsl.annotation.Configuration.class);
@@ -146,9 +148,12 @@ public class Context {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private <A extends Annotation> void scanMethod(Map<Class<?>, A> result, Method method, Class<A> annotationClass) {
         final A methodAnnotation = method.getAnnotation(annotationClass);
-        result.put(resolveClass(method.getReturnType()), methodAnnotation);
+        if (methodAnnotation != null) {
+            result.put(resolveClass(method.getReturnType()), methodAnnotation);
+        }
         Class<?>[] paramTypes = method.getParameterTypes();
         Annotation[][] paramsAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < paramTypes.length; i++) {
@@ -160,8 +165,42 @@ public class Context {
                     break;
                 }
             }
-            result.put(resolveClass(paramTypes[i]), paramAnnotation);
+            if (paramAnnotation != null) {
+                result.put(resolveClass(paramTypes[i]), paramAnnotation);
+            }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Class<?>, IncludedClass> scanForSubclasses() {
+        final Set<String> includedPackageNames = new HashSet<>();
+        for (ScannedPackage scannedPackage : scannedPackages) {
+            includedPackageNames.add(scannedPackage.getPackageName());
+        }
+        final Set<URL> urls = new HashSet<>();
+        for (Map.Entry<Class<?>, IncludedClass> entry : includedClasses.entrySet()) {
+            Class<?> clazz = entry.getKey();
+            IncludedClass config = entry.getValue();
+            if (config.isWithSubclasses()) {
+                urls.add(ClasspathHelper.forClass(clazz));
+            }
+        }
+        final Reflections packageReflections = new Reflections(includedPackageNames, urls);
+        final Map<Class<?>, IncludedClass> includedClassesHierarchy = new HashMap<>();
+        for (Map.Entry<Class<?>, IncludedClass> entry : includedClasses.entrySet()) {
+            Class<?> clazz = entry.getKey();
+            IncludedClass config = entry.getValue();
+            includedClassesHierarchy.put(clazz, config);
+            if (config.isWithSubclasses()) {
+                logger.info("Scanning for subclasses of: {} in {}", clazz, includedPackageNames);
+                Set<Class<?>> packageClasses = (Set<Class<?>>) packageReflections.getSubTypesOf(clazz);
+                for (Class<?> packageClass : packageClasses) {
+                    logger.info("Subclass found: {}", packageClass);
+                    includedClassesHierarchy.put(packageClass, config);
+                }
+            }
+        }
+        return includedClassesHierarchy;
     }
 
     private boolean isExcluded(Class<?> clazz) {
@@ -184,9 +223,10 @@ public class Context {
         return false;
     }
 
-    public Collection<Class<?>> buildTransitiveClosure() {
-        Collection<Class<?>> transitiveClosure = new HashSet<>();
-        for (Map.Entry<Class<?>, IncludedClass> entry : includedClasses.entrySet()) {
+    public Map<Class<?>, IncludedClass> buildTransitiveClosure() {
+        Map<Class<?>, IncludedClass> includedClassesHierarchy = scanForSubclasses();
+        final Map<Class<?>, IncludedClass> transitiveClosure = new HashMap<>();
+        for (Map.Entry<Class<?>, IncludedClass> entry : includedClassesHierarchy.entrySet()) {
             Class<?> clazz = entry.getKey();
             IncludedClass config = entry.getValue();
             buildTransitiveClosure(transitiveClosure, clazz, config);
@@ -194,14 +234,16 @@ public class Context {
         return transitiveClosure;
     }
 
-    private void buildTransitiveClosure(Collection<Class<?>> transitiveClosure, Class<?> clazz, IncludedClass config) {
-        if (isExcluded(clazz)) {
+    private void buildTransitiveClosure(Map<Class<?>, IncludedClass> transitiveClosure, Class<?> clazz, IncludedClass config) {
+        if (transitiveClosure.containsKey(clazz) || isExcluded(clazz)) {
             return;
         }
-        if (transitiveClosure.add(clazz) && config.isTransitive()) {
+        logger.info("Class: {}", clazz);
+        transitiveClosure.put(clazz, config);
+        if (config.isTransitive()) {
             PropertyDescriptor[] pds = propertyUtilsBean.getPropertyDescriptors(clazz);
             for (PropertyDescriptor pd : pds) {
-                logger.info("Property Descriptor: {}", pd);
+                logger.debug("Property Descriptor: {} :: {}", clazz, pd);
                 Class<?> pdClass = pd.getPropertyType();
                 if ((pdClass == null) && (pd instanceof IndexedPropertyDescriptor)) {
                     pdClass = ((IndexedPropertyDescriptor) pd).getIndexedPropertyType();
@@ -209,7 +251,7 @@ public class Context {
                 if (pdClass == null) {
                     continue;
                 }
-                IncludedClass pdConfig = includedClasses.get(pdClass);
+                IncludedClass pdConfig = transitiveClosure.get(pdClass);
                 if (pdConfig == null) {
                     pdConfig = config;
                 }

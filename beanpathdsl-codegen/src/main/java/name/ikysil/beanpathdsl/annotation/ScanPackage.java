@@ -25,13 +25,8 @@ import java.lang.annotation.Target;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE })
+@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface IncludeClass {
-
-    boolean transitive() default true;
-
-    boolean withSubclasses() default false;
-
+public @interface ScanPackage {
 }

@@ -15,9 +15,12 @@
  */
 package name.ikysil.beanpathdsl.codegen.sample;
 
+import java.beans.EventSetDescriptor;
 import javax.swing.JLabel;
 import name.ikysil.beanpathdsl.annotation.IncludeClass;
+import name.ikysil.beanpathdsl.annotation.ScanPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
+import org.apache.commons.beanutils.DynaClass;
 
 /**
  *
@@ -30,5 +33,20 @@ public interface IncludeSample {
 
     @IncludeClass
     JLabel jLabel = null;
+
+    @IncludeClass
+    @ScanPackage
+    void includeClasses(@IncludeClass(withSubclasses = true) java.beans.FeatureDescriptor featureDescriptor, EventSetDescriptor eventSetDescriptor);
+
+    @ScanPackage
+    javax.lang.model.SourceVersion getSourceVersion();
+
+    @IncludeClass(withSubclasses = true)
+    @ScanPackage
+    void includeSubclasses(java.awt.Component c, javax.swing.JComponent jc);
+
+    @IncludeClass(withSubclasses = true)
+    @ScanPackage
+    void includeBeanUtils(DynaClass dynaClass);
 
 }

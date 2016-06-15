@@ -13,23 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package name.ikysil.beanpathdsl.annotation;
+package name.ikysil.beanpathdsl.codegen.configuration;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import name.ikysil.beanpathdsl.annotation.ScanPackage;
 
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface IncludePackage {
+public class ScannedPackage {
 
-    boolean prefix() default true;
+    public ScannedPackage(Package aPackage, ScanPackage config) {
+        this.packageName = aPackage.getName();
+    }
+
+    private String packageName;
+
+    /**
+     * Get the value of packageName
+     *
+     * @return the value of packageName
+     */
+    public String getPackageName() {
+        return packageName;
+    }
+
+    /**
+     * Set the value of packageName
+     *
+     * @param packageName new value of packageName
+     */
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 
 }

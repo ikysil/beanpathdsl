@@ -23,34 +23,37 @@ import name.ikysil.beanpathdsl.annotation.IncludeClass;
  */
 public class IncludedClass {
 
+    private boolean withSubclasses;
+
     public IncludedClass(Class<?> clazz) {
-        this.clazz = clazz;
+        this.sourceClass = clazz;
         this.transitive = true;
     }
 
     public IncludedClass(Class<?> clazz, IncludeClass config) {
-        this.clazz = clazz;
+        this.sourceClass = clazz;
         this.transitive = config.transitive();
+        this.withSubclasses = config.withSubclasses();
     }
 
-    private Class<?> clazz;
+    private Class<?> sourceClass;
 
     /**
-     * Get the value of clazz
+     * Get the value of sourceClass
      *
-     * @return the value of clazz
+     * @return the value of sourceClass
      */
-    public Class<?> getClazz() {
-        return clazz;
+    public Class<?> getSourceClass() {
+        return sourceClass;
     }
 
     /**
-     * Set the value of clazz
+     * Set the value of sourceClass
      *
-     * @param clazz new value of clazz
+     * @param sourceClass new value of sourceClass
      */
-    public void setClazz(Class<?> clazz) {
-        this.clazz = clazz;
+    public void setSourceClass(Class<?> sourceClass) {
+        this.sourceClass = sourceClass;
     }
 
     private boolean transitive;
@@ -71,6 +74,19 @@ public class IncludedClass {
      */
     public void setTransitive(boolean transitive) {
         this.transitive = transitive;
+    }
+
+    public boolean isWithSubclasses() {
+        return withSubclasses;
+    }
+
+    public void setWithSubclasses(boolean withSubclasses) {
+        this.withSubclasses = withSubclasses;
+    }
+
+    @Override
+    public String toString() {
+        return "IncludedClass{" + "withSubclasses=" + withSubclasses + ", transitive=" + transitive + ", sourceClass=" + sourceClass + '}';
     }
 
 }
