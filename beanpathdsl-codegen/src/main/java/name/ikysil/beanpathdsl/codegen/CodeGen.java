@@ -30,7 +30,7 @@ public class CodeGen {
         this.configuration = configuration;
     }
 
-    public void scanInput() {
+    public void process() {
         Context context = new Context();
         context.scanAnnotatedElements();
         for (Map.Entry<Class<?>, IncludedClass> entry : context.buildTransitiveClosure().entrySet()) {
