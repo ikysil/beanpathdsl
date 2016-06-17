@@ -21,9 +21,11 @@ import java.nio.charset.Charset;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class Configuration {
+class Configuration {
 
     public static final String DEFAULT_CLASS_NAME_PREFIX = "BP";
+
+    public static final String DEFAULT_PACKAGE_NAME_SUFFIX = "beanpath";
 
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF8");
 
@@ -107,7 +109,7 @@ public class Configuration {
         this.classNameSuffix = classNameSuffix;
     }
 
-    private String packageNameSuffix;
+    private String packageNameSuffix = DEFAULT_PACKAGE_NAME_SUFFIX;
 
     /**
      * Get the value of packageNameSuffix

@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -204,7 +205,8 @@ public class Context {
     }
 
     private boolean isExcluded(Class<?> clazz) {
-        if (clazz.isPrimitive() || (clazz.getPackage() == null)) {
+        if (clazz.isPrimitive() || clazz.isAnonymousClass() || clazz.isLocalClass() || !Modifier.isPublic(clazz.getModifiers())
+                || (clazz.getPackage() == null)) {
             return true;
         }
         IncludedClass includedConfig = includedClasses.get(clazz);
@@ -241,7 +243,7 @@ public class Context {
         logger.info("Class: {}", clazz);
         transitiveClosure.put(clazz, config);
         if (config.isTransitive()) {
-            PropertyDescriptor[] pds = propertyUtilsBean.getPropertyDescriptors(clazz);
+            PropertyDescriptor[] pds = getPropertyDescriptors(clazz);
             for (PropertyDescriptor pd : pds) {
                 logger.debug("Property Descriptor: {} :: {}", clazz, pd);
                 Class<?> pdClass = pd.getPropertyType();
@@ -258,6 +260,10 @@ public class Context {
                 buildTransitiveClosure(transitiveClosure, pdClass, pdConfig);
             }
         }
+    }
+
+    public PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
+        return propertyUtilsBean.getPropertyDescriptors(clazz);
     }
 
 }
