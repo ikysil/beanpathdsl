@@ -15,7 +15,7 @@
  */
 package name.ikysil.beanpathdsl.codegen.sample;
 
-import name.ikysil.beanpathdsl.annotation.Configuration;
+import name.ikysil.beanpathdsl.core.annotations.Configuration;
 
 /**
  *

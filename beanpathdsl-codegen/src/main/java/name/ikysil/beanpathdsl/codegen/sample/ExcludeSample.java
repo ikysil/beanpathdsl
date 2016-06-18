@@ -16,8 +16,8 @@
 package name.ikysil.beanpathdsl.codegen.sample;
 
 import java.util.Collection;
-import name.ikysil.beanpathdsl.annotation.ExcludeClass;
-import name.ikysil.beanpathdsl.annotation.ExcludePackage;
+import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
+import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
 
 /**
  *

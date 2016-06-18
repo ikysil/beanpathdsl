@@ -17,8 +17,8 @@ package name.ikysil.beanpathdsl.codegen.sample;
 
 import java.beans.EventSetDescriptor;
 import javax.swing.JLabel;
-import name.ikysil.beanpathdsl.annotation.IncludeClass;
-import name.ikysil.beanpathdsl.annotation.ScanPackage;
+import name.ikysil.beanpathdsl.core.annotations.IncludeClass;
+import name.ikysil.beanpathdsl.core.annotations.ScanPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
 import org.apache.commons.beanutils.DynaClass;
 

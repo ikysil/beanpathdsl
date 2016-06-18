@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package name.ikysil.beanpathdsl.annotation;
+package name.ikysil.beanpathdsl.core.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -28,8 +28,5 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ExcludePackage {
-
-    boolean prefix() default true;
-
+public @interface ScanPackage {
 }

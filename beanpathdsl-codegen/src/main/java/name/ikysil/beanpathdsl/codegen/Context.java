@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import name.ikysil.beanpathdsl.annotation.ExcludeClass;
-import name.ikysil.beanpathdsl.annotation.ExcludePackage;
-import name.ikysil.beanpathdsl.annotation.IncludeClass;
-import name.ikysil.beanpathdsl.annotation.ScanPackage;
+import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
+import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
+import name.ikysil.beanpathdsl.core.annotations.IncludeClass;
+import name.ikysil.beanpathdsl.core.annotations.ScanPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedClass;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
@@ -114,8 +114,8 @@ class Context {
                 scannedPackages.add(new ScannedPackage(clazz.getPackage(), config));
             }
         }
-        Map<Class<?>, name.ikysil.beanpathdsl.annotation.Configuration> configurations = scanForAnnotation(name.ikysil.beanpathdsl.annotation.Configuration.class);
-        for (Map.Entry<Class<?>, name.ikysil.beanpathdsl.annotation.Configuration> entry : configurations.entrySet()) {
+        Map<Class<?>, name.ikysil.beanpathdsl.core.annotations.Configuration> configurations = scanForAnnotation(name.ikysil.beanpathdsl.core.annotations.Configuration.class);
+        for (Map.Entry<Class<?>, name.ikysil.beanpathdsl.core.annotations.Configuration> entry : configurations.entrySet()) {
             Class<?> clazz = entry.getKey();
             includedClasses.put(clazz, new IncludedClass(clazz));
         }
