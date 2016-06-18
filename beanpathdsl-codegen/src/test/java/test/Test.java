@@ -25,7 +25,7 @@ public class Test {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        //System.out.println(BPJButton.INSTANCE.componentPopupMenu().visibleRect().centerX().toString());
+        //System.out.println(path(BPJButton.INSTANCE.componentPopupMenu().visibleRect().centerX()));
     }
 
 }

@@ -25,7 +25,9 @@ class Configuration {
 
     public static final String DEFAULT_CLASS_NAME_PREFIX = "BP";
 
-    public static final String DEFAULT_PACKAGE_NAME_SUFFIX = "beanpath";
+    public static final String DEFAULT_PACKAGE_NAME_PREFIX = "beanpath";
+
+    public static final String DEFAULT_PACKAGE_NAME_SUFFIX = "";
 
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF8");
 
@@ -127,6 +129,26 @@ class Configuration {
      */
     public void setPackageNameSuffix(String packageNameSuffix) {
         this.packageNameSuffix = packageNameSuffix;
+    }
+
+    private String packageNamePrefix = DEFAULT_PACKAGE_NAME_PREFIX;
+
+    /**
+     * Get the value of packageNamePrefix
+     *
+     * @return the value of packageNamePrefix
+     */
+    public String getPackageNamePrefix() {
+        return packageNamePrefix;
+    }
+
+    /**
+     * Set the value of packageNamePrefix
+     *
+     * @param packageNamePrefix new value of packageNamePrefix
+     */
+    public void setPackageNamePrefix(String packageNamePrefix) {
+        this.packageNamePrefix = packageNamePrefix;
     }
 
 }

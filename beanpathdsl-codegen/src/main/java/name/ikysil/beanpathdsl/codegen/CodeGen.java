@@ -76,7 +76,12 @@ class CodeGen {
     }
 
     private String getTargetPackageName(Class<?> clazz) {
-        StringBuilder sb = new StringBuilder(clazz.getPackage().getName());
+        final String packageName = clazz.getPackage().getName();
+        StringBuilder sb = new StringBuilder();
+        if (!StringUtils.isBlank(configuration.getPackageNamePrefix())) {
+            sb.append(configuration.getPackageNamePrefix()).append(".");
+        }
+        sb.append(packageName);
         if (!StringUtils.isBlank(configuration.getPackageNameSuffix())) {
             sb.append(".").append(configuration.getPackageNameSuffix());
         }

@@ -55,6 +55,9 @@ public class CLI {
             if (cmdLine.hasOption("cns")) {
                 configuration.setClassNameSuffix(cmdLine.getOptionValue("cns"));
             }
+            if (cmdLine.hasOption("pnp")) {
+                configuration.setPackageNamePrefix(cmdLine.getOptionValue("pnp"));
+            }
             if (cmdLine.hasOption("pns")) {
                 configuration.setPackageNameSuffix(cmdLine.getOptionValue("pns"));
             }
@@ -93,6 +96,11 @@ public class CLI {
                 .hasArg()
                 .desc("Specify the suffix for generated classes names")
                 .build();
+        Option packageNamePrefix = Option.builder("pnp")
+                .longOpt("package-name-prefix")
+                .hasArg()
+                .desc("Specify the prefix for generated package names")
+                .build();
         Option packageNameSuffix = Option.builder("pns")
                 .longOpt("package-name-suffix")
                 .hasArg()
@@ -104,6 +112,7 @@ public class CLI {
         result.addOption(outputCharset);
         result.addOption(classNamePrefix);
         result.addOption(classNameSuffix);
+        result.addOption(packageNamePrefix);
         result.addOption(packageNameSuffix);
         return result;
     }
