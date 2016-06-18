@@ -47,4 +47,24 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <id>add-test-source</id>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>target/generated-sources/beanpath</sources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

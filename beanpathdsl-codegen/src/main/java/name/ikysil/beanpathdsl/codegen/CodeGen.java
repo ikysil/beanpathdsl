@@ -45,6 +45,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 class CodeGen {
 
+    public static final String SOURCE_CLASS_FIELD_NAME = "SOURCE_CLASS";
+
     private final Configuration configuration;
 
     public CodeGen(Configuration configuration) {
@@ -94,6 +96,15 @@ class CodeGen {
         return result;
     }
 
+    private String getInstanceAccessor(Class<?> clazz) {
+        if (BeanPath.class.equals(clazz)) {
+            return "getInstance()";
+        }
+        else {
+            return "INSTANCE";
+        }
+    }
+
     private void generateBeanPathSource(Context context, Map<Class<?>, IncludedClass> transitiveClosure, Class<?> clazz) {
         ClassName targetClassName = classNames.get(clazz);
 
@@ -112,54 +123,78 @@ class CodeGen {
         });
 
         Collection<FieldSpec> fieldSpecs = new ArrayList<>();
+        Collection<MethodSpec> methodSpecs = new ArrayList<>();
+
+        FieldSpec fieldSpec = FieldSpec.builder(targetClassName, getInstanceAccessor(clazz))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T()", targetClassName)
+                .build();
+        fieldSpecs.add(fieldSpec);
+
+        final ParameterizedTypeName fieldTypeName = ParameterizedTypeName.get(ClassName.get(Class.class), ClassName.get(clazz));
+        fieldSpec = FieldSpec.builder(fieldTypeName, SOURCE_CLASS_FIELD_NAME)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.class", clazz)
+                .build();
+        fieldSpecs.add(fieldSpec);
+
         for (PropertyDescriptor pd : pds) {
             String name = pd.getName();
-            FieldSpec fieldSpec = null;
             if (!Character.isJavaIdentifierStart(name.charAt(0))) {
                 name = "_" + name;
             }
             if ("class".equals(name)) {
                 name = "_" + name;
             }
-            if (fieldSpec == null) {
-                Class<?> pdClass = pd.getPropertyType();
-                if ((pdClass == null) && (pd instanceof IndexedPropertyDescriptor)) {
-                    pdClass = ((IndexedPropertyDescriptor) pd).getIndexedPropertyType();
-                }
-                ClassName bpAccessorClassName = classNames.get(pdClass);
-                if (bpAccessorClassName == null) {
-                    bpAccessorClassName = ClassName.get(BeanPath.class);
-                }
-                fieldSpec = FieldSpec.builder(bpAccessorClassName, name)
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                        .initializer("new $T($S)", bpAccessorClassName, pd.getName())
-                        .build();
+            Class<?> pdClass = pd.getPropertyType();
+            if ((pdClass == null) && (pd instanceof IndexedPropertyDescriptor)) {
+                pdClass = ((IndexedPropertyDescriptor) pd).getIndexedPropertyType();
             }
-            fieldSpecs.add(fieldSpec);
+            ClassName bpAccessorClassName = classNames.get(pdClass);
+            if (bpAccessorClassName == null) {
+                pdClass = BeanPath.class;
+                bpAccessorClassName = ClassName.get(pdClass);
+            }
+            MethodSpec pdMethodSpec = MethodSpec.methodBuilder(name)
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .returns(bpAccessorClassName)
+                    .addCode(CodeBlock.builder()
+                            .addStatement("extendCurrentPath($S)", pd.getName())
+                            .addStatement("return $T.$N", bpAccessorClassName, getInstanceAccessor(pdClass))
+                            .build()
+                    )
+                    .build();
+            methodSpecs.add(pdMethodSpec);
+
+            pdMethodSpec = MethodSpec.methodBuilder(name)
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .addParameter(ClassName.get(String.class), "propertyName", Modifier.FINAL)
+                    .returns(bpAccessorClassName)
+                    .addCode(CodeBlock.builder()
+                            .addStatement("extendCurrentPath($N)", "propertyName")
+                            .addStatement("return $T.$N", bpAccessorClassName, getInstanceAccessor(pdClass))
+                            .build()
+                    )
+                    .build();
+            methodSpecs.add(pdMethodSpec);
         }
 
-        final ParameterizedTypeName fieldTypeName = ParameterizedTypeName.get(ClassName.get(Class.class), ClassName.get(clazz));
-        FieldSpec fieldSpec = FieldSpec.builder(fieldTypeName, "$$SOURCE_CLASS")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .initializer("$T.class", clazz)
-                .build();
-        fieldSpecs.add(fieldSpec);
-
         MethodSpec constructor = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(String.class), "propertyName")
-                .addCode(CodeBlock.builder().addStatement("super($N)", "propertyName").build())
+                .addModifiers(Modifier.PRIVATE)
                 .build();
+        methodSpecs.add(constructor);
 
         TypeSpec typeSpec = TypeSpec.classBuilder(targetClassName)
                 .superclass(ClassName.get(BeanPath.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotation(generatedSpec)
                 .addFields(fieldSpecs)
-                .addMethod(constructor)
+                .addMethods(methodSpecs)
                 .build();
 
         JavaFile javaFile = JavaFile.builder(targetClassName.packageName(), typeSpec)
+                .skipJavaLangImports(true)
+                .indent("    ")
                 .build();
 
         try {

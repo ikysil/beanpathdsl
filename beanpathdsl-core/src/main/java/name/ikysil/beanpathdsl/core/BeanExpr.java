@@ -19,41 +19,34 @@ package name.ikysil.beanpathdsl.core;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class BeanPath {
+class BeanExpr {
 
-    private static final BeanPath INSTANCE = new BeanPath();
-
-    public static BeanPath getInstance() {
-        return INSTANCE;
+    public BeanExpr(BeanExpr parent, String propertyName) {
+        this.parent = parent;
+        this.propertyName = propertyName;
     }
 
-    private static final ThreadLocal<BeanExpr> CURRENT_PATH = new ThreadLocal<>();
+    private final String propertyName;
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    private final BeanExpr parent;
 
     /**
-     * Reset current bean path.
+     * Get the value of parent
      *
+     * @return the value of parent
      */
-    protected static void resetCurrentPath() {
-        CURRENT_PATH.remove();
-    }
-
-    protected static void extendCurrentPath(String propertyName) {
-        CURRENT_PATH.set(new BeanExpr(CURRENT_PATH.get(), propertyName));
-    }
-
-    /**
-     * Return the current bean path.
-     *
-     * @return current bean path
-     */
-    public String $$path() {
-        BeanExpr beanExpr = CURRENT_PATH.get();
-        return beanExpr == null ? null : beanExpr.toString();
+    public BeanExpr getParent() {
+        return parent;
     }
 
     @Override
     public String toString() {
-        return $$path();
+        String parentPath = parent == null ? null : parent.toString();
+        return (parentPath == null ? "" : parentPath + ".") + propertyName;
     }
 
 }
