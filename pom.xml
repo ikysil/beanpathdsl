@@ -35,6 +35,7 @@
         <module>beanpathdsl-codegen</module>
         <module>beanpathdsl-sandbox</module>
         <module>beanpathdsl-dynamic</module>
+        <module>beanpathdsl-core</module>
     </modules>
     <dependencyManagement>
         <dependencies>

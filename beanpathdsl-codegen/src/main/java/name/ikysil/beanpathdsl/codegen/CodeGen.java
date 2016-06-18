@@ -17,12 +17,13 @@ package name.ikysil.beanpathdsl.codegen;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.beans.IndexedPropertyDescriptor;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -35,13 +36,14 @@ import java.util.Map;
 import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
+import name.ikysil.beanpathdsl.core.BeanPath;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class CodeGen {
+class CodeGen {
 
     private final Configuration configuration;
 
@@ -120,30 +122,41 @@ public class CodeGen {
                 name = "_" + name;
             }
             if (fieldSpec == null) {
-                fieldSpec = FieldSpec.builder(TypeName.OBJECT, name)
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                        .initializer("$L", "null")
+                Class<?> pdClass = pd.getPropertyType();
+                if ((pdClass == null) && (pd instanceof IndexedPropertyDescriptor)) {
+                    pdClass = ((IndexedPropertyDescriptor) pd).getIndexedPropertyType();
+                }
+                ClassName bpAccessorClassName = classNames.get(pdClass);
+                if (bpAccessorClassName == null) {
+                    bpAccessorClassName = ClassName.get(BeanPath.class);
+                }
+                fieldSpec = FieldSpec.builder(bpAccessorClassName, name)
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .initializer("new $T($S)", bpAccessorClassName, pd.getName())
                         .build();
             }
             fieldSpecs.add(fieldSpec);
         }
 
         final ParameterizedTypeName fieldTypeName = ParameterizedTypeName.get(ClassName.get(Class.class), ClassName.get(clazz));
-        FieldSpec fieldSpec = FieldSpec.builder(fieldTypeName, "__bean_class")
+        FieldSpec fieldSpec = FieldSpec.builder(fieldTypeName, "$$SOURCE_CLASS")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$T.class", clazz)
                 .build();
         fieldSpecs.add(fieldSpec);
 
-        MethodSpec privateConstructor = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE)
+        MethodSpec constructor = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get(String.class), "propertyName")
+                .addCode(CodeBlock.builder().addStatement("super($N)", "propertyName").build())
                 .build();
 
         TypeSpec typeSpec = TypeSpec.classBuilder(targetClassName)
+                .superclass(ClassName.get(BeanPath.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotation(generatedSpec)
                 .addFields(fieldSpecs)
-                .addMethod(privateConstructor)
+                .addMethod(constructor)
                 .build();
 
         JavaFile javaFile = JavaFile.builder(targetClassName.packageName(), typeSpec)

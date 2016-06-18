@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class Context {
+class Context {
 
     private final Logger logger = LoggerFactory.getLogger(Context.class);
 
@@ -205,7 +205,13 @@ public class Context {
     }
 
     private boolean isExcluded(Class<?> clazz) {
-        if (clazz.isPrimitive() || clazz.isAnonymousClass() || clazz.isLocalClass() || !Modifier.isPublic(clazz.getModifiers())
+        if (clazz.isPrimitive()
+                || clazz.isAnonymousClass()
+                || clazz.isLocalClass()
+                || clazz.isInterface()
+                || clazz.isSynthetic()
+                || clazz.isEnum()
+                || !Modifier.isPublic(clazz.getModifiers())
                 || (clazz.getPackage() == null)) {
             return true;
         }
