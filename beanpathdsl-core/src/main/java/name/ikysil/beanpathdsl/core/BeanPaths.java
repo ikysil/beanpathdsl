@@ -36,6 +36,41 @@ public class BeanPaths {
     }
 
     /**
+     * Reset current bean path and start from a specified beanpath bean.
+     *
+     * @param <T> type of the beanpath bean
+     * @param root beanpath bean
+     * @return beanpath bean
+     */
+    public static <T extends BeanPath> T root(T root) {
+        reset();
+        return expr(root);
+    }
+
+    /**
+     * Continue current bean path from a specified beanpath bean.
+     *
+     * @param <T> type of the beanpath bean
+     * @param expr beanpath bean
+     * @return beanpath bean
+     */
+    public static <T extends BeanPath> T expr(T expr) {
+        return expr;
+    }
+
+    /**
+     * Reinterpret the property at current beanpath as a specified beanpath bean.
+     *
+     * @param <T> target beanpath type
+     * @param beanPath current beanpath, ignored
+     * @param expr beanpath bean
+     * @return beanpath bean
+     */
+    public static <T extends BeanPath> T as(BeanPath beanPath, T expr) {
+        return expr;
+    }
+
+    /**
      * Return the current bean path. Parameter is ignored.
      *
      * @param o ignored

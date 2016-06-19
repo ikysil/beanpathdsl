@@ -44,4 +44,15 @@ public class BeanPath {
         return BeanPaths.path();
     }
 
+    /**
+     * Reinterpret the property at current beanpath as a specified beanpath bean.
+     *
+     * @param <T> target beanpath type
+     * @param expr beanpath bean
+     * @return beanpath bean
+     */
+    public <T extends BeanPath> T as(T expr) {
+        return expr;
+    }
+
 }
