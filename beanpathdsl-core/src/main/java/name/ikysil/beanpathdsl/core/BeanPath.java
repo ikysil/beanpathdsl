@@ -52,7 +52,7 @@ public class BeanPath {
      * @return beanpath bean
      */
     public <T extends BeanPath> T as(T expr) {
-        return expr;
+        return BeanPaths.as(this, expr);
     }
 
 }

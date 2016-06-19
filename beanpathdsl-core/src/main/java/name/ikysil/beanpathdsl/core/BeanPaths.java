@@ -67,7 +67,7 @@ public class BeanPaths {
      * @return beanpath bean
      */
     public static <T extends BeanPath> T as(BeanPath beanPath, T expr) {
-        return expr;
+        return expr(expr);
     }
 
     /**
