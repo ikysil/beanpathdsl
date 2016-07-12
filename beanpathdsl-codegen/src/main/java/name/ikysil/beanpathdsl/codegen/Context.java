@@ -129,7 +129,7 @@ class Context {
             Class<?> navigatorClass = entry.getKey();
             Navigator navigator = entry.getValue();
             Class<?> navigatedClass = navigator.value();
-            knownNavigators.put(navigatedClass, new Navigated(navigatedClass, navigatorClass));
+            knownNavigators.put(navigatedClass, new Navigated(navigator, navigatorClass));
         }
     }
 

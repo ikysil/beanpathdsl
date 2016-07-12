@@ -67,8 +67,12 @@ class CodeGen {
         buildClassNames(transitiveClosure, knownNavigators);
         for (Map.Entry<Class<?>, IncludedClass> entry : transitiveClosure.entrySet()) {
             Class<?> clazz = entry.getKey();
-            if (!knownNavigators.containsKey(clazz)) {
-                generateBeanPathSource(context, transitiveClosure, clazz);
+            ClassName targetClassName = classNames.get(clazz);
+            if (knownNavigators.containsKey(clazz)) {
+                logger.info("Using {} for {}", targetClassName, clazz.getName());
+            }
+            else {
+                generateBeanPathSource(context, transitiveClosure, clazz, targetClassName);
             }
         }
     }
@@ -79,7 +83,7 @@ class CodeGen {
         for (Map.Entry<Class<?>, IncludedClass> entry : transitiveClosure.entrySet()) {
             Class<?> clazz = entry.getKey();
             Navigated knownNavigator = knownNavigators.get(clazz);
-            ClassName className = null;
+            ClassName className;
             if (knownNavigator == null) {
                 String targetPackageName = getTargetPackageName(clazz);
                 String targetClassName = getTargetClassName(clazz);
@@ -127,8 +131,8 @@ class CodeGen {
         }
     }
 
-    private void generateBeanPathSource(Context context, Map<Class<?>, IncludedClass> transitiveClosure, Class<?> clazz) {
-        ClassName targetClassName = classNames.get(clazz);
+    private void generateBeanPathSource(Context context, Map<Class<?>, IncludedClass> transitiveClosure, Class<?> clazz,
+            ClassName targetClassName) {
         logger.info("Generating {} for {}", targetClassName, clazz.getName());
 
         AnnotationSpec generatedSpec = AnnotationSpec.builder(Generated.class)

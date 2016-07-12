@@ -15,6 +15,8 @@
  */
 package name.ikysil.beanpathdsl.codegen.configuration;
 
+import name.ikysil.beanpathdsl.core.annotations.Navigator;
+
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
@@ -24,6 +26,10 @@ public class Navigated {
     private final Class<?> navigatedClass;
 
     private final Class<?> navigatorClass;
+
+    public Navigated(Navigator config, Class<?> navigatorClass) {
+        this(config.value(), navigatorClass);
+    }
 
     public Navigated(Class<?> navigatedClass, Class<?> navigatorClass) {
         this.navigatedClass = navigatedClass;
