@@ -19,11 +19,11 @@ package name.ikysil.beanpathdsl.core;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class BeanPathNavigator {
+public class BaseNavigator {
 
-    private static final BeanPathNavigator INSTANCE = new BeanPathNavigator();
+    private static final BaseNavigator INSTANCE = new BaseNavigator();
 
-    public static BeanPathNavigator getInstance() {
+    public static BaseNavigator getInstance() {
         return INSTANCE;
     }
 
@@ -51,7 +51,7 @@ public class BeanPathNavigator {
      * @param expr beanpath bean
      * @return beanpath bean
      */
-    public <T extends BeanPathNavigator> T as(T expr) {
+    public <T extends BaseNavigator> T as(T expr) {
         return BeanPaths.as(this, expr);
     }
 

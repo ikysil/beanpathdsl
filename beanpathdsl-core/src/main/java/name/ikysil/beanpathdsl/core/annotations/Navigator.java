@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package name.ikysil.beanpathdsl.codegen.sample;
+package name.ikysil.beanpathdsl.core.annotations;
 
-import java.util.Collection;
-import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
-import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public interface ExcludeSample {
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Navigator {
 
-    @ExcludeClass
-    @ExcludePackage(prefix = true)
-    void excludeClasses(Collection<?> collection,
-            javax.accessibility.Accessible accessible);
+    Class<?> value();
 
 }

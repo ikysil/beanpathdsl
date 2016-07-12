@@ -15,19 +15,19 @@
  */
 package name.ikysil.beanpathdsl.codegen.sample;
 
-import java.util.Collection;
-import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
-import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
+import name.ikysil.beanpathdsl.core.BaseNavigator;
+import name.ikysil.beanpathdsl.core.annotations.Navigator;
 
 /**
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public interface ExcludeSample {
+@Navigator(Class.class)
+public class BPClass extends BaseNavigator {
 
-    @ExcludeClass
-    @ExcludePackage(prefix = true)
-    void excludeClasses(Collection<?> collection,
-            javax.accessibility.Accessible accessible);
+    public static final BPClass INSTANCE = new BPClass();
+
+    private BPClass() {
+    }
 
 }

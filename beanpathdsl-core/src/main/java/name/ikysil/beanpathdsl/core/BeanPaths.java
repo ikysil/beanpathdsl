@@ -42,7 +42,7 @@ public class BeanPaths {
      * @param root beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPathNavigator> T root(T root) {
+    public static <T extends BaseNavigator> T root(T root) {
         reset();
         return expr(root);
     }
@@ -54,7 +54,7 @@ public class BeanPaths {
      * @param expr beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPathNavigator> T expr(T expr) {
+    public static <T extends BaseNavigator> T expr(T expr) {
         return expr;
     }
 
@@ -66,7 +66,7 @@ public class BeanPaths {
      * @param expr beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPathNavigator> T as(BeanPathNavigator beanPath, T expr) {
+    public static <T extends BaseNavigator> T as(BaseNavigator beanPath, T expr) {
         return expr(expr);
     }
 

@@ -24,18 +24,21 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
-import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
-import name.ikysil.beanpathdsl.core.annotations.IncludeClass;
-import name.ikysil.beanpathdsl.core.annotations.ScanPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedClass;
 import name.ikysil.beanpathdsl.codegen.configuration.ExcludedPackage;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
+import name.ikysil.beanpathdsl.codegen.configuration.Navigated;
 import name.ikysil.beanpathdsl.codegen.configuration.ScannedPackage;
+import name.ikysil.beanpathdsl.core.annotations.ExcludeClass;
+import name.ikysil.beanpathdsl.core.annotations.ExcludePackage;
+import name.ikysil.beanpathdsl.core.annotations.IncludeClass;
+import name.ikysil.beanpathdsl.core.annotations.Navigator;
+import name.ikysil.beanpathdsl.core.annotations.ScanPackage;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -85,6 +88,8 @@ class Context {
 
     private final Collection<ScannedPackage> scannedPackages = new ArrayList<>();
 
+    private final Map<Class<?>, Navigated> knownNavigators = new HashMap<>();
+
     public void scanAnnotatedElements() {
         Map<Class<?>, ExcludeClass> excludeClassesConfiguration = scanForAnnotation(ExcludeClass.class);
         for (Map.Entry<Class<?>, ExcludeClass> entry : excludeClassesConfiguration.entrySet()) {
@@ -118,6 +123,13 @@ class Context {
         for (Map.Entry<Class<?>, name.ikysil.beanpathdsl.core.annotations.Configuration> entry : configurations.entrySet()) {
             Class<?> clazz = entry.getKey();
             includedClasses.put(clazz, new IncludedClass(clazz));
+        }
+        Map<Class<?>, Navigator> knownNavigatorsConfiguration = scanForAnnotation(Navigator.class);
+        for (Map.Entry<Class<?>, Navigator> entry : knownNavigatorsConfiguration.entrySet()) {
+            Class<?> navigatorClass = entry.getKey();
+            Navigator navigator = entry.getValue();
+            Class<?> navigatedClass = navigator.value();
+            knownNavigators.put(navigatedClass, new Navigated(navigatedClass, navigatorClass));
         }
     }
 
@@ -270,6 +282,10 @@ class Context {
 
     public PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
         return propertyUtilsBean.getPropertyDescriptors(clazz);
+    }
+
+    public Map<Class<?>, Navigated> getKnownNavigators() {
+        return Collections.unmodifiableMap(knownNavigators);
     }
 
 }
