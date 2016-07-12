@@ -19,40 +19,34 @@ package name.ikysil.beanpathdsl.core;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-public class BeanPath {
+class BeanPath {
 
-    private static final BeanPath INSTANCE = new BeanPath();
-
-    public static BeanPath getInstance() {
-        return INSTANCE;
+    public BeanPath(BeanPath parent, String propertyName) {
+        this.parent = parent;
+        this.propertyName = propertyName;
     }
+
+    private final String propertyName;
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    private final BeanPath parent;
 
     /**
-     * Reset current bean path.
+     * Get the value of parent
      *
+     * @return the value of parent
      */
-    protected static void resetCurrentPath() {
-        BeanPaths.reset();
-    }
-
-    protected static void extendCurrentPath(String propertyName) {
-        BeanPaths.extend(propertyName);
+    public BeanPath getParent() {
+        return parent;
     }
 
     @Override
     public String toString() {
-        return BeanPaths.path();
-    }
-
-    /**
-     * Reinterpret the property at current beanpath as a specified beanpath bean.
-     *
-     * @param <T> target beanpath type
-     * @param expr beanpath bean
-     * @return beanpath bean
-     */
-    public <T extends BeanPath> T as(T expr) {
-        return BeanPaths.as(this, expr);
+        String parentPath = parent == null ? null : parent.toString();
+        return (parentPath == null ? "" : parentPath + ".") + propertyName;
     }
 
 }

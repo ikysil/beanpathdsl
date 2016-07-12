@@ -19,34 +19,40 @@ package name.ikysil.beanpathdsl.core;
  *
  * @author Illya Kysil <ikysil@ikysil.name>
  */
-class BeanExpr {
+public class BeanPathNavigator {
 
-    public BeanExpr(BeanExpr parent, String propertyName) {
-        this.parent = parent;
-        this.propertyName = propertyName;
+    private static final BeanPathNavigator INSTANCE = new BeanPathNavigator();
+
+    public static BeanPathNavigator getInstance() {
+        return INSTANCE;
     }
-
-    private final String propertyName;
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    private final BeanExpr parent;
 
     /**
-     * Get the value of parent
+     * Reset current bean path.
      *
-     * @return the value of parent
      */
-    public BeanExpr getParent() {
-        return parent;
+    protected static void reset() {
+        BeanPaths.reset();
+    }
+
+    protected static void navigate(String propertyName) {
+        BeanPaths.navigate(propertyName);
     }
 
     @Override
     public String toString() {
-        String parentPath = parent == null ? null : parent.toString();
-        return (parentPath == null ? "" : parentPath + ".") + propertyName;
+        return BeanPaths.path();
+    }
+
+    /**
+     * Reinterpret the property at current beanpath as a specified beanpath bean.
+     *
+     * @param <T> target beanpath type
+     * @param expr beanpath bean
+     * @return beanpath bean
+     */
+    public <T extends BeanPathNavigator> T as(T expr) {
+        return BeanPaths.as(this, expr);
     }
 
 }

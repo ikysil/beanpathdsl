@@ -36,7 +36,7 @@ import java.util.Map;
 import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
-import name.ikysil.beanpathdsl.core.BeanPath;
+import name.ikysil.beanpathdsl.core.BeanPathNavigator;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -102,7 +102,7 @@ class CodeGen {
     }
 
     private String getInstanceAccessor(Class<?> clazz) {
-        if (BeanPath.class.equals(clazz)) {
+        if (BeanPathNavigator.class.equals(clazz)) {
             return "getInstance()";
         }
         else {
@@ -157,14 +157,14 @@ class CodeGen {
             }
             ClassName bpAccessorClassName = classNames.get(pdClass);
             if (bpAccessorClassName == null) {
-                pdClass = BeanPath.class;
+                pdClass = BeanPathNavigator.class;
                 bpAccessorClassName = ClassName.get(pdClass);
             }
             MethodSpec pdMethodSpec = MethodSpec.methodBuilder(name)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                     .returns(bpAccessorClassName)
                     .addCode(CodeBlock.builder()
-                            .addStatement("extendCurrentPath($S)", pd.getName())
+                            .addStatement("navigate($S)", pd.getName())
                             .addStatement("return $T.$N", bpAccessorClassName, getInstanceAccessor(pdClass))
                             .build()
                     )
@@ -176,7 +176,7 @@ class CodeGen {
                     .addParameter(ClassName.get(String.class), "propertyName", Modifier.FINAL)
                     .returns(bpAccessorClassName)
                     .addCode(CodeBlock.builder()
-                            .addStatement("extendCurrentPath($N)", "propertyName")
+                            .addStatement("navigate($N)", "propertyName")
                             .addStatement("return $T.$N", bpAccessorClassName, getInstanceAccessor(pdClass))
                             .build()
                     )
@@ -190,7 +190,7 @@ class CodeGen {
         methodSpecs.add(constructor);
 
         TypeSpec typeSpec = TypeSpec.classBuilder(targetClassName)
-                .superclass(ClassName.get(BeanPath.class))
+                .superclass(ClassName.get(BeanPathNavigator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotation(generatedSpec)
                 .addFields(fieldSpecs)

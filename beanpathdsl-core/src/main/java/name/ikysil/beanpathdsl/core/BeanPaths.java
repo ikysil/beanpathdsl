@@ -21,7 +21,7 @@ package name.ikysil.beanpathdsl.core;
  */
 public class BeanPaths {
 
-    private static final ThreadLocal<BeanExpr> CURRENT_PATH = new ThreadLocal<>();
+    private static final ThreadLocal<BeanPath> CURRENT_PATH = new ThreadLocal<>();
 
     /**
      * Reset current bean path.
@@ -31,8 +31,8 @@ public class BeanPaths {
         CURRENT_PATH.remove();
     }
 
-    static void extend(String propertyName) {
-        CURRENT_PATH.set(new BeanExpr(CURRENT_PATH.get(), propertyName));
+    static void navigate(String propertyName) {
+        CURRENT_PATH.set(new BeanPath(CURRENT_PATH.get(), propertyName));
     }
 
     /**
@@ -42,7 +42,7 @@ public class BeanPaths {
      * @param root beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPath> T root(T root) {
+    public static <T extends BeanPathNavigator> T root(T root) {
         reset();
         return expr(root);
     }
@@ -54,7 +54,7 @@ public class BeanPaths {
      * @param expr beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPath> T expr(T expr) {
+    public static <T extends BeanPathNavigator> T expr(T expr) {
         return expr;
     }
 
@@ -66,7 +66,7 @@ public class BeanPaths {
      * @param expr beanpath bean
      * @return beanpath bean
      */
-    public static <T extends BeanPath> T as(BeanPath beanPath, T expr) {
+    public static <T extends BeanPathNavigator> T as(BeanPathNavigator beanPath, T expr) {
         return expr(expr);
     }
 
@@ -86,7 +86,7 @@ public class BeanPaths {
      * @return current bean path
      */
     public static String path() {
-        BeanExpr beanExpr = CURRENT_PATH.get();
+        BeanPath beanExpr = CURRENT_PATH.get();
         return beanExpr == null ? null : beanExpr.toString();
     }
 
