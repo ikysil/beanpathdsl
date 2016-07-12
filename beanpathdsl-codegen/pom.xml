@@ -62,7 +62,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sources>target/generated-test-sources/beanpath</sources>
+                    <sources>
+                        <source>target/generated-test-sources/beanpath</source>
+                    </sources>
                 </configuration>
             </plugin>
         </plugins>
