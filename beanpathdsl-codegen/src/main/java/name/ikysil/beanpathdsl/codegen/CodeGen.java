@@ -27,11 +27,13 @@ import java.beans.IndexedPropertyDescriptor;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
@@ -170,13 +172,7 @@ class CodeGen {
         fieldSpecs.add(fieldSpec);
 
         for (PropertyDescriptor pd : pds) {
-            String name = pd.getName();
-            if (!Character.isJavaIdentifierStart(name.charAt(0))) {
-                name = "_" + name;
-            }
-            if ("class".equals(name)) {
-                name = "_" + name;
-            }
+            final String name = getNavigationMethodName(pd);
             Class<?> pdClass = pd.getPropertyType();
             if ((pdClass == null) && (pd instanceof IndexedPropertyDescriptor)) {
                 pdClass = ((IndexedPropertyDescriptor) pd).getIndexedPropertyType();
@@ -235,6 +231,61 @@ class CodeGen {
         catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * These are java JAVA_KEYWORDS as specified at the following URL (sorted alphabetically)
+     * http://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.9.
+     *
+     * Note that false, true, and null are not strictly keywords; they are literal values, but for the purposes of this
+     * array, they can be treated as literals.
+     *
+     * ****** PLEASE KEEP THIS LIST SORTED IN ASCENDING ORDER ******
+     */
+    static final String[] JAVA_KEYWORDS = {
+        "abstract", "assert",
+        "boolean", "break", "byte",
+        "case", "catch", "char", "class", "const", "continue",
+        "default", "do", "double",
+        "else", "enum", "extends",
+        "false", "final", "finally", "float", "for",
+        "goto",
+        "if", "implements", "import", "instanceof", "int", "interface",
+        "long",
+        "native", "new", "null",
+        "package", "private", "protected", "public",
+        "return",
+        "short", "static", "strictfp", "super", "switch", "synchronized",
+        "this", "throw", "throws", "transient", "true", "try",
+        "void", "volatile",
+        "while"
+    };
+
+    /**
+     * Collator for comparing the strings
+     */
+    static final Collator ENGLISH_COLLATOR = Collator.getInstance(Locale.ENGLISH);
+
+    /**
+     * Use this character as prefix
+     */
+    static final char KEYWORD_PREFIX = '_';
+
+    /**
+     * checks if the input string is a valid Java keyword.
+     *
+     * @return boolean true/false
+     */
+    public static boolean isJavaKeyword(String name) {
+        return (Arrays.binarySearch(JAVA_KEYWORDS, name, ENGLISH_COLLATOR) >= 0);
+    }
+
+    private String getNavigationMethodName(PropertyDescriptor pd) {
+        String name = pd.getName();
+        if (!Character.isJavaIdentifierStart(name.charAt(0)) || isJavaKeyword(name)) {
+            name = KEYWORD_PREFIX + name;
+        }
+        return name;
     }
 
 }
