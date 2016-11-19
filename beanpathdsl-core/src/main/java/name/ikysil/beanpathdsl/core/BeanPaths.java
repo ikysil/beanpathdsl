@@ -27,11 +27,16 @@ public class BeanPaths {
      * Reset current bean path.
      *
      */
-    static void reset() {
+    public static void reset() {
         CURRENT_PATH.remove();
     }
 
-    static void navigate(String propertyName) {
+    /**
+     * Continue current bean path from a specified property name.
+     *
+     * @param propertyName property name
+     */
+    public static void navigate(String propertyName) {
         CURRENT_PATH.set(new BeanPath(CURRENT_PATH.get(), propertyName));
     }
 

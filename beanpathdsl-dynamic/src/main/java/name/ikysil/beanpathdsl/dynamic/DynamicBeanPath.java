@@ -28,6 +28,7 @@ import java.util.Set;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import name.ikysil.beanpathdsl.core.BeanPaths;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 
 /**
@@ -35,8 +36,6 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
  * @author Illya Kysil <ikysil@ikysil.name>
  */
 public final class DynamicBeanPath {
-
-    private static final ThreadLocal<BeanExpr> CURRENT_PATH = new ThreadLocal<>();
 
     private static final ThreadLocal<Set<BeanFactory>> FACTORIES = new ThreadLocal<Set<BeanFactory>>() {
 
@@ -63,7 +62,7 @@ public final class DynamicBeanPath {
      * @return instance of the bean class instrumented to capture getters and setters invocations
      */
     public static <T> T root(Class<T> clazz) {
-        CURRENT_PATH.remove();
+        BeanPaths.reset();
         return expr(clazz);
     }
 
@@ -107,7 +106,7 @@ public final class DynamicBeanPath {
      * @return current bean path
      */
     public static String path(Object o) {
-        return path();
+        return BeanPaths.path();
     }
 
     /**
@@ -116,8 +115,7 @@ public final class DynamicBeanPath {
      * @return current bean path
      */
     public static String path() {
-        BeanExpr beanExpr = CURRENT_PATH.get();
-        return beanExpr == null ? null : beanExpr.toString();
+        return BeanPaths.path();
     }
 
     private static class DefaultMethodFilter implements MethodFilter {
@@ -180,11 +178,13 @@ public final class DynamicBeanPath {
         private boolean extendCurrentPath(Method m) throws IllegalStateException {
             final String methodName = m.getName();
             PropertyDescriptor pd = methodNameToPropertyDescriptor.get(methodName);
-            final boolean result = pd != null;
-            if (result) {
-                CURRENT_PATH.set(new BeanExpr(CURRENT_PATH.get(), pd));
+            if (pd == null) {
+                return false;
             }
-            return result;
+            else {
+                BeanPaths.navigate(pd.getName());
+                return true;
+            }
         }
 
     }

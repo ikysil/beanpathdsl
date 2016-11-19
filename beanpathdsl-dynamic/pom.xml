@@ -17,5 +17,10 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>beanpathdsl-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
