@@ -35,7 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import name.ikysil.beanpathdsl.codegen.configuration.IncludedClass;
 import name.ikysil.beanpathdsl.codegen.configuration.Navigated;

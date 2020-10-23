@@ -78,7 +78,7 @@ public final class DynamicBeanPath {
         try {
             T result;
             if (Modifier.isFinal(clazz.getModifiers())) {
-                result = clazz.newInstance();
+                result = clazz.getConstructor().newInstance();
             }
             else {
                 ProxyFactory pf = new ProxyFactory();
